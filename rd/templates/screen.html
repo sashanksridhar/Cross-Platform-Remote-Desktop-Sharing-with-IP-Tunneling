@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+
+    img {
+    max-width: 100%;
+    max-height: 100vh;
+    height: auto;
+}
+
+</style>
+<head>
+
+    <meta charset="UTF-8">
+    <title>Screen</title>
+
+    	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+		<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.finger.min.js') }}"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='js/materialize.min.js') }}"></script>
+</head>
+<body>
+<div >
+	<img class="screen" id="screen" src="{{ url_for('sendImg') }}">
+    <script>
+        	function get_xy(event, offset){
+			// function to get position of event on image
+			if(event.pageX == null){
+				// for mobile
+				var x = event.x - offset.left
+				var y = event.y - offset.top;
+			}
+			else{
+				// for pc
+				var x = event.pageX - offset.left
+				var y = event.pageY - offset.top;
+
+			}
+			return [x,y];
+		}
+		function mouse_event(screen, event, type1) {
+			var offset = screen.offset();
+			var point = get_xy(event, offset);
+			console.log(type1);
+
+			$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/mouse",
+				data: {
+						type: type1,
+						x: point[0],
+						y: point[1],
+						X: screen.width(),
+						Y: screen.height()
+					},
+				dataType:"json",
+				success: function(result) {
+				//alert("success")
+				}
+			});
+		}
+
+function keyboard_event(type1) {
+			console.log(type1);
+			$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/keyboard",
+				data: {
+						type: type1
+					},
+				success: function(result) { }
+			});
+		}
+
+function text_event(ch,ev){
+console.log(ev);
+var which = -1;
+	if (ev.which) {
+		which = ev.which;
+	} else if (ev.keyCode) {
+		which = ev.keyCode;
+	}
+	var shift_status = false;
+	if (ev.shiftKey) {
+		shift_status = ev.shiftKey;
+	} else if (ev.modifiers) {
+		shift_status = !!(ev.modifiers & 4);
+	}
+	if (((which >= 65 && which <= 90) && !shift_status) ||
+	((which >= 97 && which <= 122) && shift_status)) {
+	// uppercase, no shift key
+	$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/text",
+				data: {
+						type: ch
+					},
+				success: function(result) { }
+			});
+} else {
+	$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/text",
+				data: {
+						type: ch.toUpperCase()
+					},
+				success: function(result) { }
+			});
+}
+
+		}
+
+		function char_event(ch,ev){
+console.log(ev);
+if(ev.shiftKey){
+	// uppercase, no shift key
+	$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/char",
+				data: {
+				        shift : 'true',
+						type: ch
+					},
+				success: function(result) { }
+			});
+} else {
+	$.ajax({
+				type: 'POST',
+				url: "http://10.5.4.234:8003/char",
+				data: {
+						shift : 'false',
+						type :ch
+					},
+				success: function(result) { }
+			});
+}
+
+		}
+
+
+
+        $(document).ready(function() {
+			$.Finger.doubleTapInterval = 2000;
+			document.oncontextmenu = function() {return false;};
+
+
+			$('#screen').on('mousemove', function(event) {
+				var screen = $(this);
+				mouse_event(screen, event, "mousemove");
+			});
+            $('#screen').on('tap', function(event) {
+				var screen = $(this);
+				mouse_event(screen, event, "click");
+
+			});
+			$('#screen').on('taphold contextmenu', function(event) {
+				var screen = $(this);
+				mouse_event(screen, event, "rightclick");
+			});
+			$('#screen').on('doubletap dblclick', function(event) {
+				var screen = $(this);
+				mouse_event(screen, event, "dblclick");
+			});
+            $('html').on('keyup', function(event){
+				if(event.keyCode == 13){
+			        keyboard_event('enter')
+				}else if(event.keyCode == 8){
+					 keyboard_event('backspace')
+				}else if(event.keyCode == 37){
+					 keyboard_event('left')
+				}else if(event.keyCode == 38){
+					 keyboard_event('up')
+				}else if(event.keyCode == 39){
+					 keyboard_event('right')
+				}else if(event.keyCode == 40){
+					 keyboard_event('down')
+				}else if(event.keyCode == 40){
+					 keyboard_event('down')
+				}else if(event.keyCode == 9){
+					 keyboard_event('tab')
+				}else if(event.keyCode == 45){
+					 keyboard_event('insert')
+				}else if(event.keyCode == 27){
+					 keyboard_event('escape')
+				}else if(event.keyCode == 46){
+					 keyboard_event('delete')
+				}else if(event.keyCode == 48){
+					 char_event('0',event)
+				}else if(event.keyCode == 49){
+					 char_event('1',event)
+				}else if(event.keyCode == 50){
+					 char_event('2',event)
+				}else if(event.keyCode == 51){
+					 char_event('3',event)
+				}else if(event.keyCode == 52){
+					 char_event('4',event)
+				}else if(event.keyCode == 53){
+					 char_event('5',event)
+				}else if(event.keyCode == 54){
+					 char_event('6',event)
+				}else if(event.keyCode == 55){
+					 char_event('7',event)
+				}else if(event.keyCode == 56){
+					 char_event('8',event)
+				}else if(event.keyCode == 57){
+					 char_event('9',event)
+				}else if(event.keyCode == 192){
+					 char_event('`',event)
+				}else if(event.keyCode == 189){
+					 char_event('-',event)
+				}else if(event.keyCode == 187){
+					 char_event('=',event)
+				}else if(event.keyCode == 219){
+					 char_event('[',event)
+				}else if(event.keyCode == 221){
+					 char_event(']',event)
+				}else if(event.keyCode == 220){
+					 char_event('\\',event)
+				}else if(event.keyCode == 186){
+					 char_event(';',event)
+				}else if(event.keyCode == 222){
+					 char_event('\'',event)
+				}else if(event.keyCode == 188){
+					 char_event(',',event)
+				}else if(event.keyCode == 190){
+					 char_event('.',event)
+				}else if(event.keyCode == 191){
+					 char_event('/',event)
+				}else if(event.keyCode == 65){
+				     text_event('a',event)
+				}else if(event.keyCode == 66){
+				     text_event('b',event)
+				}else if(event.keyCode == 67){
+				     text_event('c',event)
+				}else if(event.keyCode == 68){
+				     text_event('d',event)
+				}else if(event.keyCode == 69){
+				     text_event('e',event)
+				}else if(event.keyCode == 70){
+				     text_event('f',event)
+				}else if(event.keyCode == 71){
+				     text_event('g',event)
+				}else if(event.keyCode == 72){
+				     text_event('h',event)
+				}else if(event.keyCode == 73){
+				     text_event('i',event)
+				}else if(event.keyCode == 74){
+				     text_event('j',event)
+				}else if(event.keyCode == 75){
+				     text_event('k',event)
+				}else if(event.keyCode == 76){
+				     text_event('l',event)
+				}else if(event.keyCode == 77){
+				     text_event('m',event)
+				}else if(event.keyCode == 78){
+				     text_event('n',event)
+				}else if(event.keyCode == 79){
+				     text_event('o',event)
+				}else if(event.keyCode == 80){
+				     text_event('p',event)
+				}else if(event.keyCode == 81){
+				     text_event('q',event)
+				}else if(event.keyCode == 82){
+				     text_event('r',event)
+				}else if(event.keyCode == 83){
+				     text_event('s',event)
+				}else if(event.keyCode == 84){
+				     text_event('t',event)
+				}else if(event.keyCode == 85){
+				     text_event('u',event)
+				}else if(event.keyCode == 86){
+				     text_event('v',event)
+				}else if(event.keyCode == 87){
+				     text_event('w',event)
+				}else if(event.keyCode == 88){
+				     text_event('x',event)
+				}else if(event.keyCode == 89){
+				     text_event('y',event)
+				}else if(event.keyCode == 90){
+				     text_event('z',event)
+				}
+
+			});
+
+
+
+		});
+    </script>
+</div>
+</body>
+</html>
